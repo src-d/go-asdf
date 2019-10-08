@@ -57,12 +57,12 @@ func (du documentUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, erro
 			switch node.Kind {
 			case yaml.SequenceNode:
 				um := schema.FindDefinition(schema.Tag{
-					Name: "stsci.edu:asdf/core/history/sequence",
+					Name:    "stsci.edu:asdf/core/history/sequence",
 					Version: semver.MustParse("1.1.0")})
 				obj, err = um.UnmarshalYAML(node)
 			case yaml.MappingNode:
 				um := schema.FindDefinition(schema.Tag{
-					Name: "stsci.edu:asdf/core/history/mapping",
+					Name:    "stsci.edu:asdf/core/history/mapping",
 					Version: semver.MustParse("1.1.0")})
 				obj, err = um.UnmarshalYAML(node)
 			default:

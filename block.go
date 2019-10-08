@@ -20,13 +20,13 @@ type CompressionKind int
 
 const (
 	// CompressionNone corresponds to no compression.
-	CompressionNone  CompressionKind = iota
+	CompressionNone CompressionKind = iota
 	// CompressionZLIB corresponds to zlib compression: balanced compression/decompression performance, moderate compression ratio.
-	CompressionZLIB  CompressionKind = iota
+	CompressionZLIB CompressionKind = iota
 	// CompressionBZIP2 corresponds to bzip2 compression: slow compression/decompression, good compression ratio.
 	CompressionBZIP2 CompressionKind = iota
 	// CompressionLZ4 corresponds to lz4 compression: very fast compression/decompression, poor compression ratio for complex data, moderate/good for ordered.
-	CompressionLZ4   CompressionKind = iota
+	CompressionLZ4 CompressionKind = iota
 
 	// FlagStreamed denotes a streamed block. Not used anywhere yet.
 	FlagStreamed uint32 = 1
@@ -45,25 +45,25 @@ type Block struct {
 	checksum []byte
 }
 
-var compressionMapping = map[string]CompressionKind {
+var compressionMapping = map[string]CompressionKind{
 	"\x00\x00\x00\x00": CompressionNone,
-	"zlib": CompressionZLIB,
-	"bzp2": CompressionBZIP2,
-	"lz4\x00": CompressionLZ4,
+	"zlib":             CompressionZLIB,
+	"bzp2":             CompressionBZIP2,
+	"lz4\x00":          CompressionLZ4,
 }
 
-var compressionNames = map[CompressionKind]string {
-	CompressionNone: "none",
-	CompressionZLIB: "zlib",
+var compressionNames = map[CompressionKind]string{
+	CompressionNone:  "none",
+	CompressionZLIB:  "zlib",
 	CompressionBZIP2: "bzip2",
-	CompressionLZ4: "lz4",
+	CompressionLZ4:   "lz4",
 }
 
-var decompressors = map[CompressionKind]func(reader io.Reader) (io.Reader, error) {
-	CompressionNone: newNoneReader,
-	CompressionZLIB: newZlibReader,
+var decompressors = map[CompressionKind]func(reader io.Reader) (io.Reader, error){
+	CompressionNone:  newNoneReader,
+	CompressionZLIB:  newZlibReader,
 	CompressionBZIP2: newBzip2Reader,
-	CompressionLZ4: newLZ4Reader,
+	CompressionLZ4:   newLZ4Reader,
 }
 
 // Uncompress switches the block's compression to "none", uncompressing `Data` in-place as needed
@@ -119,19 +119,19 @@ func ReadBlock(reader io.Reader) (*Block, error) {
 	offset := 0
 	block.Flags = binary.BigEndian.Uint32(buffer[:4])
 	offset += 4
-	compression := buffer[offset:offset+4]
+	compression := buffer[offset : offset+4]
 	offset += 4
 	var exists bool
 	block.Compression, exists = compressionMapping[string(compression)]
 	if !exists {
 		return nil, errors.Errorf("unsupported block compression: %s", string(compression))
 	}
-	allocatedSize := binary.BigEndian.Uint64(buffer[offset:offset+8])
+	allocatedSize := binary.BigEndian.Uint64(buffer[offset : offset+8])
 	offset += 8
-	usedSize := binary.BigEndian.Uint64(buffer[offset:offset+8])
+	usedSize := binary.BigEndian.Uint64(buffer[offset : offset+8])
 	// ignore data_size
 	offset += 16
-	block.checksum = buffer[offset:offset+16]
+	block.checksum = buffer[offset : offset+16]
 	block.Data = make([]byte, usedSize)
 	_, err = io.ReadFull(reader, block.Data)
 	if err != nil {
@@ -172,7 +172,7 @@ func newLZ4Reader(reader io.Reader) (io.Reader, error) {
 			return nil, err
 		}
 		size := binary.BigEndian.Uint32(sizeBuffer)
-		lz4data := make([]byte, size - 4)
+		lz4data := make([]byte, size-4)
 		_, err = io.ReadFull(reader, sizeBuffer)
 		if err != nil {
 			return nil, err

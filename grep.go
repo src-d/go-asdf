@@ -11,7 +11,7 @@ const bufferSize = 1 << 16
 // specified byte sequence in a byte stream. -1 is returned if there is no match.
 func Grep(reader io.Reader, needle []byte) (int, error) {
 	tailSize := len(needle) - 1
-	buffer := make([]byte, bufferSize + tailSize)
+	buffer := make([]byte, bufferSize+tailSize)
 	pos := -1
 	var n, offset int
 	var err error
