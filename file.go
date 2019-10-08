@@ -46,6 +46,9 @@ func OpenFile(fileName string, progress ProgressCallback) (*File, error) {
 // Open reads ASDF from a seekable reader.
 func Open(reader io.ReadSeeker, progress ProgressCallback) (*File, error) {
 	file := &File{}
+	if progress == nil {
+		progress = func(_, _ int) {}
+	}
 	progress(0, 2)
 	var err error
 	file.FormatVersion, file.StandardVersion, err = parseHeader(reader)
