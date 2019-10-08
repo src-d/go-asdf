@@ -19,6 +19,7 @@ matrix:
 before_install:
   - go get -v golang.org/x/lint/golint
   - go get -v github.com/haya14busa/goverage
+  - go get -v golang.org/x/tools/cmd/goimports
 
 install:
   - go mod download
@@ -28,6 +29,8 @@ script:
   - export PATH=$PATH:$HOME
   - fmt_warns=$(gofmt -s -l .)
   - if [ ! -z "$fmt_warns" ]; then echo "$fmt_warns"; exit 1; fi
+  - import_warns=$(goimports -l .)
+  - if [ ! -z "$import_warns" ]; then echo "$import_warns"; exit 1; fi
   - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi

@@ -9,8 +9,7 @@ import (
 
 func TestOpenFile(t *testing.T) {
 	req := require.New(t)
-	asdfFile, err := OpenFile("testdata/default.asdf",
-		func(done, total int) {})
+	asdfFile, err := OpenFile("testdata/default.asdf", nil)
 	req.NoError(err)
 	req.NotNil(asdfFile)
 }
