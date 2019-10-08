@@ -38,17 +38,17 @@ func (arr NDArray) String() string {
 }
 
 var basicMapping = map[string]*types.Basic{
-	"int8": types.Typ[types.Int8],
-	"int16": types.Typ[types.Int16],
-	"int32": types.Typ[types.Int32],
-	"int64": types.Typ[types.Int64],
-	"uint8": types.Typ[types.Uint8],
-	"uint16": types.Typ[types.Uint16],
-	"uint32": types.Typ[types.Uint32],
-	"uint64": types.Typ[types.Uint64],
-	"float32": types.Typ[types.Float32],
-	"float64": types.Typ[types.Float64],
-	"complex64": types.Typ[types.Complex64],
+	"int8":       types.Typ[types.Int8],
+	"int16":      types.Typ[types.Int16],
+	"int32":      types.Typ[types.Int32],
+	"int64":      types.Typ[types.Int64],
+	"uint8":      types.Typ[types.Uint8],
+	"uint16":     types.Typ[types.Uint16],
+	"uint32":     types.Typ[types.Uint32],
+	"uint64":     types.Typ[types.Uint64],
+	"float32":    types.Typ[types.Float32],
+	"float64":    types.Typ[types.Float64],
+	"complex64":  types.Typ[types.Complex64],
 	"complex128": types.Typ[types.Complex128],
 }
 
@@ -95,7 +95,7 @@ func (ndaum ndarrayUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, er
 			for j, sn := range node.Content {
 				dim, err := strconv.Atoi(sn.Value)
 				if err != nil {
-					return nil, errors.Errorf("while parsing core/ndarray-%s: shape[%d] must be " +
+					return nil, errors.Errorf("while parsing core/ndarray-%s: shape[%d] must be "+
 						"an integer, got %s", ndaum.Version(), j, sn.Value)
 				}
 				arr.Shape = append(arr.Shape, dim)

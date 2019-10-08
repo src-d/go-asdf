@@ -108,7 +108,7 @@ func parseTree(reader io.ReadSeeker) (*yaml.Node, int, error) {
 	}
 	var yamlReader io.Reader = reader
 	if border >= 0 {
-		buffer := make([]byte, border + 3)
+		buffer := make([]byte, border+3)
 		_, err = io.ReadFull(reader, buffer)
 		if err != nil {
 			return nil, 0, err
@@ -138,7 +138,7 @@ func parseTree(reader io.ReadSeeker) (*yaml.Node, int, error) {
 			"invalid format: the document must contain exactly one root element")
 	}
 	tree := doc.Content[0]
-	return tree, border+borderLen-len(blockMagic), nil
+	return tree, border + borderLen - len(blockMagic), nil
 }
 
 func findBorder(reader io.ReadSeeker) (int, int, error) {
@@ -168,12 +168,12 @@ func parseHeader(reader io.ReadSeeker) (semver.Version, semver.Version, error) {
 	}
 	header := scanner.Text()
 	if !strings.HasPrefix(header, "#ASDF ") {
-		return dummy, dummy, errors.Errorf("invalid ASDF file header, the first line must start " +
+		return dummy, dummy, errors.Errorf("invalid ASDF file header, the first line must start "+
 			"with \"#ASDF \": %s", header)
 	}
 	formatVersion, err := semver.Make(header[6:])
 	if err != nil {
-		return dummy, dummy, errors.Errorf("invalid ASDF file header, cannot parse semver from " +
+		return dummy, dummy, errors.Errorf("invalid ASDF file header, cannot parse semver from "+
 			"\"%s\"", header[6:])
 	}
 	scanner.Scan()
@@ -183,12 +183,12 @@ func parseHeader(reader io.ReadSeeker) (semver.Version, semver.Version, error) {
 	}
 	header = scanner.Text()
 	if !strings.HasPrefix(header, "#ASDF_STANDARD ") {
-		return dummy, dummy, errors.Errorf("invalid ASDF file header, the second line must start " +
+		return dummy, dummy, errors.Errorf("invalid ASDF file header, the second line must start "+
 			"with \"#ASDF_STANDARD \": %s", header)
 	}
 	standardVersion, err := semver.Make(header[15:])
 	if err != nil {
-		return dummy, dummy, errors.Errorf("invalid ASDF file header, cannot parse semver from " +
+		return dummy, dummy, errors.Errorf("invalid ASDF file header, cannot parse semver from "+
 			"\"%s\"", header[15:])
 	}
 	_, err = reader.Seek(0, io.SeekStart)

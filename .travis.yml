@@ -26,6 +26,8 @@ install:
 
 script:
   - export PATH=$PATH:$HOME
+  - fmt_warns=$(gofmt -s -l .)
+  - if [ ! -z "$fmt_warns" ]; then echo "$fmt_warns"; exit 1; fi
   - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi

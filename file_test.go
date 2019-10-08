@@ -10,7 +10,7 @@ import (
 func TestOpenFile(t *testing.T) {
 	req := require.New(t)
 	asdfFile, err := OpenFile("testdata/default.asdf",
-		func(done, total int){})
+		func(done, total int) {})
 	req.NoError(err)
 	req.NotNil(asdfFile)
 }
@@ -40,7 +40,7 @@ func TestFindBorderPositive(t *testing.T) {
 
 func TestFindBorderNegative(t *testing.T) {
 	req := require.New(t)
-	for x := 0; x < bufferSize * 3; x += 1024 {
+	for x := 0; x < bufferSize*3; x += 1024 {
 		buf := bytes.NewBuffer(bytes.Repeat([]byte{'.'}, x))
 		pos, size, err := findBorder(bytes.NewReader(buf.Bytes()))
 		req.NoErrorf(err, "x %d", x)
