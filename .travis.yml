@@ -1,0 +1,38 @@
+dist: bionic
+
+language: go
+
+go:
+  - 1.12
+  - 1.13
+
+cache:
+  directories:
+    - $HOME/go/src
+
+env:
+  - GO111MODULE=on GOBIN=$HOME
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - go get -v golang.org/x/lint/golint
+  - go get -v github.com/haya14busa/goverage
+
+install:
+  - go mod download
+  - go build -v github.com/src-d/go-asdf
+
+script:
+  - export PATH=$PATH:$HOME
+  - go vet ./...
+  - lint_warns=$(golint ./... | grep -v vendor/) || true
+  - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
+  - goverage -coverprofile=coverage.txt -covermode=count github.com/src-d/go-asdf/...
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
