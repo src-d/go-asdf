@@ -9,9 +9,16 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// Document carries the ASDF object tree with its metadata.
 type Document struct {
+	// Library is the information about the software library used to create the ASDF file.
+	// See https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/software-1.0.0.html
 	Library *Software
+	// History is the list of extensions used to create the ASDF file.
+	// See https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/asdf-1.1.0.html#history
 	History *History
+	// Tree is the contents of the ASDF file. It is mapped to a JSON object model.
+	// Please refer to https://godoc.org/github.com/Jeffail/gabs
 	Tree *gabs.Container
 }
 
@@ -76,6 +83,7 @@ func (du documentUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, erro
 	return doc, nil
 }
 
+// IterArrays visits all the contained ndarray-s in the document.
 func (doc Document) IterArrays(visitor func(array *NDArray)) {
 	queue := []*gabs.Container{doc.Tree}
 	for len(queue) > 0 {

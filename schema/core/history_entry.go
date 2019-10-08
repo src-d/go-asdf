@@ -8,9 +8,14 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// HistoryEntry is defined in https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/history_entry-1.0.0.html
 type HistoryEntry struct {
+	// Description is the description of the transformation performed.
 	Description string
+	// Time is the timestamp of the transformation, in UTC.
 	Time string
+	// Software is the list of https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/software-1.0.0.html
+	// It may contain one or more elements.
 	Software []*Software
 }
 

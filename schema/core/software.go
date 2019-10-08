@@ -10,12 +10,17 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// Software is the information about a library or a tool.
 type Software struct {
+	// Name and the version.
 	schema.Tag
+	// Author is the author of the software.
 	Author string
+	// HomePage is the URL of the software.
 	HomePage string
 }
 
+// Strings formats the object as a string.
 func (s Software) String() string {
 	return fmt.Sprintf("%s-%s [%s](%s)", s.Name, s.Version, s.Author, s.HomePage)
 }

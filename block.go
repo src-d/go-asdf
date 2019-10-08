@@ -15,23 +15,33 @@ import (
 
 var blockMagic = [4]byte{0xd3, 0x42, 0x4c, 0x4b}
 
+// CompressionKind indicates the block compression type: none, zlib, bzip2 or lz4.
 type CompressionKind int
 
 const (
+	// CompressionNone corresponds to no compression.
 	CompressionNone  CompressionKind = iota
+	// CompressionZLIB corresponds to zlib compression: balanced compression/decompression performance, moderate compression ratio.
 	CompressionZLIB  CompressionKind = iota
+	// CompressionBZIP2 corresponds to bzip2 compression: slow compression/decompression, good compression ratio.
 	CompressionBZIP2 CompressionKind = iota
+	// CompressionLZ4 corresponds to lz4 compression: very fast compression/decompression, poor compression ratio for complex data, moderate/good for ordered.
 	CompressionLZ4   CompressionKind = iota
 
+	// FlagStreamed denotes a streamed block. Not used anywhere yet.
 	FlagStreamed uint32 = 1
 )
 
+// Block corresponds to an ASDF block.
 type Block struct {
+	// Data is the block's payload.
 	Data []byte
+	// Flags is the block's flags. The 1.x standard does not define any flags except `FlagStreamed`.
 	Flags uint32
+	// Compression is the block's compression type: none, zlib, bzip2 or lz4.
 	Compression CompressionKind
 
-	dataSize uint64
+	// checksum is MD5 of uncompressed `Data`.
 	checksum []byte
 }
 
@@ -56,6 +66,8 @@ var decompressors = map[CompressionKind]func(reader io.Reader) (io.Reader, error
 	CompressionLZ4: newLZ4Reader,
 }
 
+// Uncompress switches the block's compression to "none", uncompressing `Data` in-place as needed
+// and checking the checksum.
 func (block *Block) Uncompress() error {
 	reader, err := decompressors[block.Compression](bytes.NewBuffer(block.Data))
 	if err != nil {
@@ -81,6 +93,8 @@ func (block *Block) Uncompress() error {
 	return nil
 }
 
+// ReadBlock loads another block from the specified reader. That block may be compressed,
+// call `Uncompress()` to obtain the original Data.
 func ReadBlock(reader io.Reader) (*Block, error) {
 	block := &Block{}
 	buffer := make([]byte, 4)
@@ -115,9 +129,8 @@ func ReadBlock(reader io.Reader) (*Block, error) {
 	allocatedSize := binary.BigEndian.Uint64(buffer[offset:offset+8])
 	offset += 8
 	usedSize := binary.BigEndian.Uint64(buffer[offset:offset+8])
-	offset += 8
-	block.dataSize = binary.BigEndian.Uint64(buffer[offset:offset+8])
-	offset += 8
+	// ignore data_size
+	offset += 16
 	block.checksum = buffer[offset:offset+16]
 	block.Data = make([]byte, usedSize)
 	_, err = io.ReadFull(reader, block.Data)

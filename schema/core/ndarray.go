@@ -15,10 +15,16 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// NDArray is defined in https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/ndarray-1.0.0.html
+// It is similar to `numpy.ndarray` in Python.
 type NDArray struct {
+	// DataType is the array element type.
 	DataType *types.Basic
+	// Shape is the array shape: a one-dimensional integer sequence.
 	Shape []int
+	// ByteOrder is the byte order if the array contains integers.
 	ByteOrder binary.ByteOrder
+	// Data is the raw array buffer, similar to `numpy.ndarray.data`.
 	Data []byte
 }
 
@@ -89,7 +95,7 @@ func (ndaum ndarrayUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, er
 			for j, sn := range node.Content {
 				dim, err := strconv.Atoi(sn.Value)
 				if err != nil {
-					return nil, errors.Errorf("while parsing core/ndarray-%s: shape[%s] must be " +
+					return nil, errors.Errorf("while parsing core/ndarray-%s: shape[%d] must be " +
 						"an integer, got %s", ndaum.Version(), j, sn.Value)
 				}
 				arr.Shape = append(arr.Shape, dim)

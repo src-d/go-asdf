@@ -8,8 +8,11 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// History is defined in https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/asdf-1.1.0.html#history
 type History struct {
+	// Extensions is the list of transformations applied to the document.
 	Extensions []*ExtensionMetadata
+	// File change history.
 	Entries []*HistoryEntry
 }
 

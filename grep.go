@@ -7,6 +7,8 @@ import (
 
 const bufferSize = 1 << 16
 
+// Grep does the same as the UNIX `grep -m1` command: search for the first occurrence of the
+// specified byte sequence in a byte stream. -1 is returned if there is no match.
 func Grep(reader io.Reader, needle []byte) (int, error) {
 	tailSize := len(needle) - 1
 	buffer := make([]byte, bufferSize + tailSize)

@@ -16,12 +16,16 @@ import (
 	"github.com/src-d/go-asdf/schema/core"
 )
 
+// File is the top level, ASDF file type.
 type File struct {
 	core.Document
+	// FormatVersion corresponds to the contents of #ASDF header comment.
 	FormatVersion semver.Version
+	// FormatVersion corresponds to the contents of #ASDF_STANDARD header comment.
 	StandardVersion semver.Version
 }
 
+// ProgressCallback allows tracking the file loading progress. Both done *and* total will grow dynamically.
 type ProgressCallback func(done, total int)
 
 var borderMarks = [][]byte{
@@ -29,6 +33,7 @@ var borderMarks = [][]byte{
 	append([]byte{'.', '.', '.', '\r', '\n'}, blockMagic[:]...),
 }
 
+// OpenFile reads ASDF from the file system.
 func OpenFile(fileName string, progress ProgressCallback) (*File, error) {
 	reader, err := mmap.Open(fileName)
 	if err != nil {
@@ -38,6 +43,7 @@ func OpenFile(fileName string, progress ProgressCallback) (*File, error) {
 	return Open(io.NewSectionReader(reader, 0, int64(reader.Len())), progress)
 }
 
+// Open reads ASDF from a seekable reader.
 func Open(reader io.ReadSeeker, progress ProgressCallback) (*File, error) {
 	file := &File{}
 	progress(0, 2)

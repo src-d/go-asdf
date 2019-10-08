@@ -15,6 +15,7 @@ type hnode struct {
 	Node *yaml.Node
 }
 
+// GabsifyYAML inserts the contents of a YAML node as another property of the JSON object, `key`.
 func GabsifyYAML(container *gabs.Container, root *yaml.Node, key string) error {
 	queue := []hnode{{[]string{key}, root}}
 	for len(queue) > 0 {

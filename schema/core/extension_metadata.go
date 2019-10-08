@@ -8,8 +8,11 @@ import (
 	"github.com/src-d/go-asdf/schema"
 )
 
+// ExtensionMetadata is defined in https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/extension_metadata-1.0.0.html
 type ExtensionMetadata struct {
+	// Class is the value of `extension_class` property.
 	Class string
+	// Package indicates the name and the version of the extension.
 	Package schema.Tag
 }
 
