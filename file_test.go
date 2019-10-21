@@ -47,3 +47,10 @@ func TestFindBorderNegative(t *testing.T) {
 		req.Equal(0, size, "x %d", x)
 	}
 }
+
+func TestInlineArray(t *testing.T) {
+	req := require.New(t)
+	asdfFile, err := OpenFile("testdata/inline.asdf", nil)
+	req.NoError(err)
+	req.NotNil(asdfFile)
+}
