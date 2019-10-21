@@ -74,10 +74,12 @@ func Open(reader io.ReadSeeker, progress ProgressCallback) (*File, error) {
 	}
 	file.Document = *doc.(*core.Document)
 	progress(2, 2)
-	if _, err = reader.Seek(int64(blockOffset), io.SeekStart); err != nil {
-		return nil, err
+	if blockOffset > 0 {
+		if _, err = reader.Seek(int64(blockOffset), io.SeekStart); err != nil {
+			return nil, err
+		}
+		err = readAndResolveBlocks(&file.Document, reader, progress)
 	}
-	err = readAndResolveBlocks(&file.Document, reader, progress)
 	return file, err
 }
 

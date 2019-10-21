@@ -1,0 +1,68 @@
+#ASDF 1.0.0
+#ASDF_STANDARD 1.0.0
+%YAML 1.1
+%TAG ! tag:stsci.edu:asdf/
+--- !core/asdf-1.0.0
+asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
+  name: asdf, version: 1.0.0}
+dataf64: !core/ndarray-1.0.0
+  datatype: float64
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataf32: !core/ndarray-1.0.0
+  datatype: float32
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+datai32: !core/ndarray-1.0.0
+  datatype: int64
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataui64: !core/ndarray-1.0.0
+  datatype: uint64
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+datai32: !core/ndarray-1.0.0
+  datatype: int32
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataui32: !core/ndarray-1.0.0
+  datatype: uint32
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+datai16: !core/ndarray-1.0.0
+  datatype: int16
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataui16: !core/ndarray-1.0.0
+  datatype: uint16
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+datai8: !core/ndarray-1.0.0
+  datatype: int8
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataui8: !core/ndarray-1.0.0
+  datatype: uint8
+  data:
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+dataf: !core/ndarray-1.0.0
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1.5, 0], [0, 0, 1, 1]]]
+datai: !core/ndarray-1.0.0
+    [[[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 0, 1]],
+     [[0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1]]]
+scalar_int: !core/ndarray-1.0.0
+  data: 7
+scalar_float: !core/ndarray-1.0.0
+  data: 3.5
+...
