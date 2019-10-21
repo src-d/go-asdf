@@ -82,23 +82,83 @@ func Open(reader io.ReadSeeker, progress ProgressCallback) (*File, error) {
 }
 
 func readAndResolveBlocks(doc *core.Document, reader io.Reader, progress ProgressCallback) error {
-	arrays := map[int]*core.NDArray{}
+	arrays := map[int][]*core.NDArray{}
+	maxIndex := -1
 	doc.IterArrays(func(arr *core.NDArray) {
-		index := binary.LittleEndian.Uint32(arr.Data)
-		arrays[int(index)] = arr
+		index := int(binary.LittleEndian.Uint32(arr.Data))
+		if index > maxIndex {
+			maxIndex = index
+		}
+		arrays[index] = append(arrays[index], arr)
 	})
-	progress(2, len(arrays)+2)
+	progress(2, maxIndex+2)
 	steps := 2
-	for i := 0; i < len(arrays); i++ {
+	for i := 0; i < maxIndex; i++ {
 		block, err := ReadBlock(reader)
 		if err != nil {
 			return errors.Wrapf(err, "reading block #%d", i)
+		}
+		blockArrays, exist := arrays[i]
+		if !exist {
+			// Orphaned block which is not used by any array
+			continue
 		}
 		err = block.Uncompress()
 		if err != nil {
 			return errors.Wrapf(err, "uncompressing block #%d", i)
 		}
-		arrays[i].Data = block.Data
+		for _, arr := range blockArrays {
+			if len(arr.Data) == 4 {
+				arr.Data = block.Data
+				continue
+			}
+			// There is a position
+			offset := int(binary.LittleEndian.Uint32(arr.Data[4:8]))
+			strides := make([]int, (len(arr.Data)-8)/4)
+			if len(strides) == 0 {
+				arr.Data = block.Data[offset : offset+arr.CountBytes()]
+				continue
+			}
+			// Construct the new contiguous array from scratch
+			size := 1
+			for j := range strides {
+				stride := int(binary.LittleEndian.Uint32(arr.Data[8+j*4 : 8+(j+1)*4]))
+				strides[j] = stride
+				size *= stride
+			}
+			arr.Data = make([]byte, arr.CountBytes())
+			chunkSize := arr.Shape[len(arr.Shape)-1] * arr.ElementSize()
+			if len(arr.Shape) == 1 {
+				copy(arr.Data, block.Data[offset:offset+chunkSize])
+				continue
+			}
+			lastStride := strides[len(strides)-1] * arr.ElementSize()
+			balance := make([]int, len(arr.Shape)-1)
+			offsets := make([]int, len(arr.Shape)-1)
+			for j := 0; j < len(arr.Shape)-1; j++ {
+				balance[j] = arr.Shape[j]
+				offsets[j] = offset
+			}
+			arrOffset := 0
+			for focus := 0; focus >= 0; {
+				copy(arr.Data[arrOffset:arrOffset+chunkSize], block.Data[offset:offset+chunkSize])
+				arrOffset += chunkSize
+				offset += lastStride
+				for focus = len(arr.Shape) - 2; focus >= 0; {
+					balance[focus]--
+					if balance[focus] == 0 {
+						balance[focus] = arr.Shape[focus]
+						offset = offsets[focus] + strides[focus]
+						for dim := focus; dim < len(arr.Shape)-1; dim++ {
+							offsets[dim] = offset
+						}
+						focus--
+					} else {
+						break
+					}
+				}
+			}
+		}
 		progress(steps+i+1, len(arrays)+2)
 	}
 	return nil

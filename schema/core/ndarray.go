@@ -18,16 +18,24 @@ import (
 // NDArray is defined in https://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/core/ndarray-1.0.0.html
 // It is similar to `numpy.ndarray` in Python.
 type NDArray struct {
-	// DataType is the array element type.
+	// DataType is the tensor element type.
 	DataType *types.Basic
-	// Shape is the array shape: a one-dimensional integer sequence.
+	// Shape is the tensor shape: a one-dimensional integer sequence.
 	Shape []int
-	// ByteOrder is the byte order if the array contains integers.
+	// ByteOrder is the byte order if the tensor contains integers.
 	ByteOrder binary.ByteOrder
-	// Data is the raw array buffer, similar to `numpy.ndarray.data`.
+	// Data is the raw tensor buffer, similar to `numpy.ndarray.data`.
 	Data []byte
 }
 
+type ndarrayPosition struct {
+	// Strides is the numbers of bytes to step in each dimension when traversing the tensor.
+	Strides []int
+	// Offset is the number of bytes to initially skip in the block.
+	Offset int
+}
+
+// String formats the tensor as a string. The actual contents are not included.
 func (arr NDArray) String() string {
 	dims := make([]string, 0, len(arr.Shape))
 	for _, s := range arr.Shape {
@@ -35,6 +43,25 @@ func (arr NDArray) String() string {
 	}
 	return fmt.Sprintf("array<%s, %s> of shape [%s]", arr.DataType.String(),
 		arr.ByteOrder.String(), strings.Join(dims, ", "))
+}
+
+// ElementSize returns the data type size in bytes.
+func (arr NDArray) ElementSize() int {
+	return int((&types.StdSizes{WordSize: 8, MaxAlign: 8}).Sizeof(arr.DataType.Underlying()))
+}
+
+// CountElements returns the total number of elements in the tensor.
+func (arr NDArray) CountElements() int {
+	size := 1
+	for _, dim := range arr.Shape {
+		size *= dim
+	}
+	return size
+}
+
+// CountBytes returns the size of the tensor in bytes.
+func (arr NDArray) CountBytes() int {
+	return arr.CountElements() * arr.ElementSize()
 }
 
 var basicMapping = map[string]*types.Basic{
@@ -63,6 +90,7 @@ func (ndaum ndarrayUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, er
 	if value.Kind != yaml.MappingNode {
 		return nil, errors.Errorf("node type must be a mapping for core/ndarray-%s", ndaum.Version())
 	}
+	pos := ndarrayPosition{}
 	arr := &NDArray{Data: make([]byte, 4)}
 	for i := 1; i < len(value.Content); i += 2 {
 		node := value.Content[i]
@@ -105,13 +133,53 @@ func (ndaum ndarrayUnmarshaler) UnmarshalYAML(value *yaml.Node) (interface{}, er
 		if key == "source" {
 			src, err := strconv.Atoi(node.Value)
 			if err != nil {
-				return nil, errors.Wrapf(err, "while parsing core/ndarray-%s/source", ndaum.Version())
+				return nil, errors.Errorf("while parsing core/ndarray-%s/source: external blocks "+
+					"are not supported: %s", ndaum.Version(), node.Value)
 			}
 			binary.LittleEndian.PutUint32(arr.Data, uint32(src))
 			continue
 		}
+		if key == "strides" {
+			if node.Kind != yaml.SequenceNode {
+				return nil, errors.Errorf("while parsing core/ndarray-%s: strides must be a sequence",
+					ndaum.Version())
+			}
+			for j, sn := range node.Content {
+				stride, err := strconv.Atoi(sn.Value)
+				if err != nil {
+					return nil, errors.Errorf("while parsing core/ndarray-%s: strides[%d] must be "+
+						"an integer, got %s", ndaum.Version(), j, sn.Value)
+				}
+				if stride < 1 {
+					return nil, errors.Errorf("while parsing core/ndarray-%s: strides[%d] must be "+
+						"greater than 0, got %s", ndaum.Version(), j, sn.Value)
+				}
+				pos.Strides = append(pos.Strides, stride)
+			}
+			continue
+		}
+		if key == "offset" {
+			var err error
+			pos.Offset, err = strconv.Atoi(node.Value)
+			if err != nil {
+				return nil, errors.Wrapf(err, "while parsing core/ndarray-%s/source: offset "+
+					"must be an integer", ndaum.Version())
+			}
+			if pos.Offset < 0 {
+				return nil, errors.Errorf("while parsing core/ndarray-%s: offset may not be "+
+					"negative (%d)", ndaum.Version(), pos.Offset)
+			}
+			continue
+		}
 		return nil, errors.Errorf("unknown property of core/ndarray-%s: %s",
 			ndaum.Version(), key)
+	}
+	if pos.Strides != nil || pos.Offset != 0 {
+		buffer := make([]byte, 4+4*len(pos.Strides))
+		binary.LittleEndian.PutUint32(buffer, uint32(pos.Offset))
+		for i, stride := range pos.Strides {
+			binary.LittleEndian.PutUint32(buffer[4+i*4:], uint32(stride))
+		}
 	}
 	return arr, nil
 }
