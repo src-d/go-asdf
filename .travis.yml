@@ -18,7 +18,6 @@ matrix:
 
 before_install:
   - go get -v golang.org/x/lint/golint
-  - go get -v github.com/haya14busa/goverage
   - go get -v golang.org/x/tools/cmd/goimports
 
 install:
@@ -34,7 +33,7 @@ script:
   - go vet ./...
   - lint_warns=$(golint ./... | grep -v vendor/) || true
   - if [ ! -z "$lint_warns" ]; then echo "$lint_warns"; exit 1; fi
-  - goverage -coverprofile=coverage.txt -covermode=count github.com/src-d/go-asdf/...
+  - go test -coverprofile=coverage.txt -covermode=count -tags gorgonia github.com/src-d/go-asdf/...
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
